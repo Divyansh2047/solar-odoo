@@ -1,0 +1,74 @@
+/* Floating labels for 3D scenes: solid backing, real text, leader line to the anchor. */
+.k3-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+.k3-leaders {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  overflow: visible;
+}
+.k3-leaders line {
+  stroke: var(--silicon);
+  stroke-width: 1.5;
+}
+.k3-leaders circle {
+  fill: var(--sun);
+  stroke: var(--silicon);
+  stroke-width: 2;
+}
+.k3-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  gap: 2px;
+  max-width: min(250px, 70vw);
+  padding: 7px 10px 8px 11px;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  border-left: 4px solid var(--ink-3);
+  border-radius: var(--r-chip);
+  box-shadow: var(--shadow-float);
+  font-family: var(--font);
+  font-size: var(--t-13);
+  line-height: 1.3;
+  will-change: transform;
+}
+.k3-label strong {
+  font-weight: 700;
+  font-size: var(--t-14);
+  font-variant-numeric: tabular-nums;
+}
+.k3-label strong.mono {
+  font-family: var(--mono);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.k3-label span {
+  color: var(--ink-2);
+}
+.k3-label span[hidden] {
+  display: none;
+}
+.k3-label[data-tone='good'] {
+  border-left-color: var(--good);
+}
+.k3-label[data-tone='bad'] {
+  border-left-color: var(--bad);
+}
+.k3-overlay[data-compact] .k3-label {
+  max-width: min(210px, 46%);
+  padding: 5px 8px 6px 9px;
+  font-size: var(--t-12);
+}
+.k3-overlay[data-compact] .k3-label strong {
+  font-size: var(--t-13);
+}

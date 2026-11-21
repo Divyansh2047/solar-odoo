@@ -1,0 +1,10 @@
+{
+  "name": "Arka",
+  "short_name": "Arka",
+  "description": "Rooftop solar operations, from the first enquiry to the twentieth year.",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#F2F5F8",
+  "theme_color": "#0E1A2B",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

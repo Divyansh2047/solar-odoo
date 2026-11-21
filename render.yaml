@@ -1,0 +1,40 @@
+# Render Blueprint: creates the web service and the database and wires DATABASE_URL without anyone
+# copying a password. Choose a paid database plan (or point DATABASE_URL at a non-expiring provider)
+# so the demo can't disappear before judging: free Render databases are deleted after 30 days.
+services:
+  - type: web
+    name: arka
+    runtime: docker
+    region: singapore
+    plan: starter
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: arka-db
+          property: connectionString
+      - key: APP_SECRET
+        generateValue: true
+      # one proxy hop (Render's load balancer): req.ip is the real client, and a client can't spoof it
+      - key: TRUST_PROXY
+        value: "1"
+      - key: LOG_LEVEL
+        value: info
+      - key: APP_URL
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: DEMO_DAYS
+        value: "60"
+
+databases:
+  - name: arka-db
+    region: singapore
+    plan: basic-256mb
+    postgresMajorVersion: "16"
+    databaseName: arka

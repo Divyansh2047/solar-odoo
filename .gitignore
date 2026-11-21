@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.data/
+.env
+.env.*
+!.env.example
+*.log
+coverage/
+e2e/out/
+e2e/shots/
+test-results/
+playwright-report/
+.DS_Store
+Thumbs.db
+e2e/.tmp/

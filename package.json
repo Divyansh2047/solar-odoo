@@ -1,0 +1,37 @@
+{
+  "name": "arka",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Arka: the operating system for rooftop solar installers, from the first enquiry to the twentieth year.",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "server",
+    "web"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "db": "node scripts/dev-db.mjs",
+    "build": "npm run build -w web && npm run build -w server",
+    "start": "node server/dist/index.js",
+    "typecheck": "tsc -p shared --noEmit && tsc -p server --noEmit && tsc -p web --noEmit",
+    "test": "npm test -w server",
+    "e2e": "node e2e/smoke.mjs",
+    "shots": "node e2e/screenshots.mjs",
+    "a11y": "node e2e/a11y.mjs",
+    "seed": "npm run seed -w server"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true,
+    "@embedded-postgres/windows-x64@18.7.0-beta.19": true
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "playwright": "^1.65.1"
+  }
+}

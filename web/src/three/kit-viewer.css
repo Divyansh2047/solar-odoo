@@ -1,0 +1,97 @@
+.kitv {
+  display: grid;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.kitv-stage {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--cell-soft) 70%, var(--surface)) 0%, var(--surface-2) 70%);
+  touch-action: pan-y;
+  user-select: none;
+}
+.kitv-stage > div:first-child,
+.kitv-stage canvas {
+  display: block;
+}
+.kitv-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.kitv-taglist {
+  position: absolute;
+  left: var(--s-3);
+  top: var(--s-3);
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+.kitv-taglist .k3-label {
+  position: static;
+  box-shadow: none;
+}
+.kitv-empty {
+  position: absolute;
+  left: var(--s-4);
+  bottom: var(--s-4);
+  margin: 0;
+  padding: var(--s-2) var(--s-3);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  color: var(--ink-2);
+  font-size: var(--t-14);
+}
+.kitv-parts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.kitv-part {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 44px;
+  padding: 0 var(--s-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-ctl);
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: var(--t-14);
+  cursor: pointer;
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.kitv-part:hover {
+  border-color: var(--ink-3);
+}
+.kitv-part[aria-pressed='true'] {
+  border-color: var(--sun-strong);
+  background: color-mix(in srgb, var(--sun) 22%, var(--surface));
+}
+.kitv-swatch {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  border-radius: var(--r-cell);
+  /* ink-3 keeps the edge at 3:1 or better on both themes, so dark parts still show on a dark page */
+  border: 1px solid var(--ink-3);
+  background: linear-gradient(90deg, transparent 6px, rgba(255, 255, 255, 0.35) 6px 7px, transparent 7px), #1d3a6e;
+}
+.kitv-swatch[data-part='inverter'] {
+  background: var(--module-ink);
+  box-shadow: inset 0 -3px 0 var(--sun);
+}
+.kitv-swatch[data-part='battery'] {
+  background: var(--silicon-2);
+}
+.kitv-swatch[data-part='controller'] {
+  background: var(--module-ink);
+  box-shadow: inset 0 -3px 0 var(--good);
+}
