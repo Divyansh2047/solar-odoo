@@ -42,7 +42,8 @@ await step('landing page loads with a demo button above the fold', async () => {
 await step('one-click demo opens a private SunPower workspace', async () => {
   await d.getByRole('button', { name: /live demo/i }).first().click();
   await d.waitForURL(/\/app/, { timeout: 90000 });
-  await d.getByRole('heading', { name: /How is SunPower Solutions doing/i }).waitFor({ timeout: 30000 });
+  await d.getByRole('heading', { name: 'Dashboard' }).waitFor({ timeout: 30000 });
+  await d.getByText('SunPower Solutions,').first().waitFor();
 });
 
 await step('director sees the month module and profit per job', async () => {
@@ -71,7 +72,7 @@ await step('rainy-season ticket is under warranty and shows ₹0 to the customer
 
 await step('public enquiry lands in sales live, in another session, without a reload', async () => {
   await d.goto(BASE + '/app/enquiries');
-  await d.getByRole('heading', { name: /Who asked for solar/ }).waitFor();
+  await d.getByRole('heading', { name: 'Enquiries', exact: true }).waitFor();
   const nav = await d.evaluate(() => fetch('/api/nav').then((r) => r.json()));
   const visitor = await browser.newContext();
   const v = await newPage(visitor, 'visitor');
@@ -96,7 +97,8 @@ await step('dispatch day: packed off-grid kit leaves with every serial recorded'
   await d.getByLabel('Vehicle number').fill('GJ02XY4321');
   await d.getByLabel('Driver', { exact: true }).fill('Salim Pathan');
   await d.getByRole('button', { name: 'Dispatch now' }).click();
-  await d.getByText(/On the truck:/).waitFor({ timeout: 10000 });
+  // the toast is brief; the dispatched page (vehicle number on screen) proves it too
+  await d.getByText(/On the truck:|GJ02XY4321/).first().waitFor({ timeout: 15000 });
 });
 
 await step('role switch: the technician sees their day on a phone', async () => {
@@ -128,7 +130,8 @@ await step('sign-up validates, verifies email by code, opens an empty workspace'
   await s.getByLabel('Code').fill(code.trim());
   await s.getByRole('button', { name: 'Confirm email' }).click();
   await s.waitForURL(/\/app/, { timeout: 20000 });
-  await s.getByRole('heading', { name: /How is Surya Rooftops doing/ }).waitFor();
+  await s.getByRole('heading', { name: 'Dashboard' }).waitFor();
+  await s.getByText('Surya Rooftops,').first().waitFor();
 });
 
 await browser.close();

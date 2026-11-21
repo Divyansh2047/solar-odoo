@@ -14,6 +14,7 @@ Updated as the build goes, so anyone (or a fresh session) can pick up exactly wh
 - Demo simulation: every story completes (0 dropped). A kit that is short of stock now waits for the top-up instead of stopping half-way; if a story ever does stop, its order is cancelled with a reason, so nothing sits in the warehouse for months.
 - Verification (production build on :4100): 52 backend tests pass; 9/9 end-to-end checks with 0 console errors; axe audit (13 screens, light and dark) 0 violations; screenshot matrix re-shot, with a check that no page scrolls sideways.
 - Deploy files: Dockerfile, render.yaml (Blueprint), CI workflow, .env.example, README with honest "How we built it".
+- UI revision 2 (team feedback: "looks like a prototype"): new director dashboard (KPI board with 12-week sparklines, 12-week chart, needs attention, orders in progress by stage, profitability, money, subsidy, a real table of jobs not closed), sidebar with icons, calm demo notice, plain page titles with one-line descriptions, panel header bars, light KPI strips, underlined section tabs, aligned forms and lists, phone action grids, no line breaks inside dates and units. A second independent review found 15 issues; all fixed. Also fixed: the Jobs "All" tab showed only closed jobs. Details in docs/design-direction.md, "Revision 2".
 
 ## Remaining
 - Human steps: GitHub repo + push, Render Blueprint deploy (paid or non-expiring database), Resend sending domain, custom domain DNS. Rotate any credentials that were exposed in round 1.

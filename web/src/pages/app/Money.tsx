@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
+import { durationWords,
   INVOICE_STATUS_LABEL,
   PAYMENT_METHOD_LABEL,
   SUBSIDY_STATUS_LABEL,
@@ -33,9 +33,10 @@ export default function Money() {
   }, []);
   return (
     <div className="page">
-      <PageHead title="Who owes what, and who do we pay?" lead="Invoices, payments, customers’ subsidy paperwork and technicians’ pay." />
+      <PageHead title="Money" lead="Invoices, payments, customers’ subsidy paperwork and technicians’ pay." />
       <Seg
         label="Section"
+        variant="tabs"
         value={tab as Tab}
         onChange={(v) => nav(`/app/money/${v}`)}
         options={[
@@ -157,14 +158,14 @@ function Subsidy() {
             { header: 'Stage', cell: (r) => <Chip tone={tone(r.status)}>{SUBSIDY_STATUS_LABEL[r.status]}</Chip> },
             { header: 'Documents', cell: (r) => `${[r.docs_bill, r.docs_id, r.docs_bank, r.docs_photo].filter(Boolean).length} of 4` },
             { header: 'Application', cell: (r) => <span className="mono">{r.application_no ?? '—'}</span> },
-            { header: 'In this stage', className: 'r', cell: (r) => (r.status === 'disbursed' ? <span className="muted">done</span> : <span style={{ color: r.days_in_stage > 20 ? 'var(--bad)' : undefined }}>{r.days_in_stage} days</span>) },
+            { header: 'In this stage', className: 'r', cell: (r) => (r.status === 'disbursed' ? <span className="muted">done</span> : <span style={{ color: r.days_in_stage > 20 ? 'var(--bad)' : undefined }}>{durationWords(r.days_in_stage)}</span>) },
             { header: 'Amount', className: 'r', cell: (r) => <M paise={r.disbursed_paise ?? r.expected_paise} /> },
             { header: '', cell: (r) => can('subsidy.write') && r.status !== 'disbursed' && <Button size="sm" onClick={() => setEdit(r)}>Update</Button> },
           ]}
           card={(r) => ({
             title: r.customer,
             right: <Chip tone={tone(r.status)}>{SUBSIDY_STATUS_LABEL[r.status]}</Chip>,
-            meta: [r.job_ref, formatINR(r.expected_paise), `${r.days_in_stage} days in stage`],
+            meta: [r.job_ref, formatINR(r.expected_paise), `${durationWords(r.days_in_stage)} in this stage`],
             extra: can('subsidy.write') && r.status !== 'disbursed' ? <Button size="sm" onClick={() => setEdit(r)}>Update</Button> : undefined,
           })}
         />

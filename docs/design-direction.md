@@ -94,3 +94,18 @@ Left aligned throughout. The week is a real sequence, so the days are the struct
 - *First idea:* KPI cards in a row. That's the SaaS card kit. **Changed** to one dark "module" with cells and gaps, the shape of a solar panel.
 - *First idea:* a mono font for small labels. That's template chrome. **Restricted** mono to serial numbers, references and meter readings, where it does a job.
 - Rejected: purple/blue gradients, glass on everything, emoji headings, identical rounded cards with grey shadows, middle-dot meta strings, all-caps eyebrows.
+
+## Revision 2: from prototype to production (after team review)
+
+The team's verdict on round one was that the app read as a prototype. What changed, and why:
+
+| Before | After | Why |
+|---|---|---|
+| Page titles were questions ("Where is every order?") | Plain names ("Jobs"), with the explanation underneath | People navigating a tool look for nouns; the question voice read as a pitch, not a product |
+| A dark KPI slab with coloured numbers and a yellow-flooded cell | One light KPI board: four headline numbers with 12-week sparklines, four supporting numbers, a sun line on the one that matters (kW installed) | Colour is kept for meaning (loss, urgent); trends sit next to the numbers they explain |
+| Director dashboard: KPI slab, profit bars, three side panels | Overview: KPI board → 12-week chart (one measure at a time) + Needs attention → Orders in progress (six stages, left to right) → profitability + money + subsidy → jobs not closed (a real table) | The standard dashboard order (headline, trend, exceptions, detail), with the installer's own pipeline as the domain-specific band |
+| Sidebar with a "wire" of dots | Icons per page, a sun bar on the current page, quiet count pills | Faster to scan; the journey order is kept |
+| Hazard-striped demo banner | A calm tinted notice bar | The striping read as "under construction" |
+| Panels: title floating above content | A header bar with a hairline and a small shadow; 15 px titles | Clear structure without heavier borders |
+| Headings at weight 800, body 15 px | Weight 700 with tighter tracking, body 14 px | Less shouty, denser, closer to the tools office teams already use |
+| Unlit cells in navy | Light grey-blue by day, slate at night | The solar-cell strip stays the signature, without heavy dark blocks on a light page |

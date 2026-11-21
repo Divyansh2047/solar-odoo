@@ -50,8 +50,8 @@ export default function Catalog() {
   return (
     <div className="page">
       <PageHead
-        title="What do we stock, and what goes in each kit?"
-        lead="Prices and costs here feed every quote. Serial-tracked items carry their warranty length; the clock starts on delivery."
+        title="Catalogue"
+        lead="Products, prices, stock and kit templates."
         actions={
           can('catalog.write') &&
           tab === 'stock' && (
@@ -61,7 +61,8 @@ export default function Catalog() {
           )
         }
       />
-      <Seg label="Section" value={tab} onChange={setTab} options={[{ value: 'stock', label: 'Products and stock' }, { value: 'kits', label: 'Kit templates' }]} />
+      <Seg label="Section"
+        variant="tabs" value={tab} onChange={setTab} options={[{ value: 'stock', label: 'Products and stock' }, { value: 'kits', label: 'Kit templates' }]} />
       {tab === 'stock' ? <Stock onEdit={can('catalog.write') ? setEdit : undefined} /> : <Kits />}
       {edit && <ProductDialog product={edit === 'new' ? null : edit} onClose={() => setEdit(null)} />}
     </div>

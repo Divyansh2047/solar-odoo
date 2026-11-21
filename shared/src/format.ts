@@ -18,8 +18,11 @@ export function formatDate(value: string | Date | null | undefined, tz = DEFAULT
   if (!value) return '—';
   const d = typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? new Date(`${value}T12:00:00Z`) : new Date(value);
   if (Number.isNaN(d.getTime())) return '—';
-  return fmt(tz, { day: 'numeric', month: 'short', year: 'numeric' }, 'd').format(d);
+  return nbsp(fmt(tz, { day: 'numeric', month: 'short', year: 'numeric' }, 'd').format(d));
 }
+
+/** Join the parts of a short value ("20 Nov 2026", "3 kW") so a line never breaks inside it. */
+const nbsp = (s: string) => s.replace(/ /g, '\u00a0');
 
 /** 12 Mar, 14:30 */
 export function formatDateTime(value: string | Date | null | undefined, tz = DEFAULT_TZ): string {
@@ -45,25 +48,25 @@ export function relativeTime(value: string | Date | null | undefined, now = new 
   const min = 60_000, hour = 60 * min, day = 24 * hour;
   let s: string;
   if (abs < min) return 'just now';
-  if (abs < hour) s = `${Math.round(abs / min)} min`;
-  else if (abs < day) s = `${Math.round(abs / hour)} h`;
-  else if (abs < 30 * day) s = `${Math.round(abs / day)} day${Math.round(abs / day) === 1 ? '' : 's'}`;
-  else if (abs < 365 * day) s = `${Math.round(abs / (30 * day))} mo`;
-  else s = `${(abs / (365 * day)).toFixed(1).replace(/\.0$/, '')} yr`;
+  if (abs < hour) s = `${Math.round(abs / min)}\u00a0min`;
+  else if (abs < day) s = `${Math.round(abs / hour)}\u00a0h`;
+  else if (abs < 30 * day) s = `${Math.round(abs / day)}\u00a0day${Math.round(abs / day) === 1 ? '' : 's'}`;
+  else if (abs < 365 * day) s = `${Math.round(abs / (30 * day))}\u00a0mo`;
+  else s = `${(abs / (365 * day)).toFixed(1).replace(/\.0$/, '')}\u00a0yr`;
   return diff < 0 ? `${s} ago` : `in ${s}`;
 }
 
 export function formatKw(kw: number | string | null | undefined): string {
   if (kw === null || kw === undefined || kw === '') return '—';
   const n = Number(kw);
-  return `${Number.isInteger(n) ? n : n.toFixed(1)} kW`;
+  return `${Number.isInteger(n) ? n : n.toFixed(1)}\u00a0kW`;
 }
 
 export function formatQty(qty: number | string, uom?: string): string {
   const n = Number(qty);
   const s = Number.isInteger(n) ? String(n) : n.toFixed(3).replace(/\.?0+$/, '');
   if (!uom || uom === 'unit') return s;
-  return `${s} ${uom}`;
+  return `${s}\u00a0${uom}`;
 }
 
 /** +91 98250 12345 */
@@ -79,16 +82,18 @@ export function warrantyLeft(endIso: string | null | undefined, todayIso: string
   const end = new Date(`${endIso}T00:00:00Z`).getTime();
   const today = new Date(`${todayIso}T00:00:00Z`).getTime();
   const days = Math.round((end - today) / 86_400_000);
-  const words = (d: number) => {
-    const y = Math.floor(d / 365);
-    const m = Math.floor((d % 365) / 30);
-    if (y && m) return `${y} yr ${m} mo`;
-    if (y) return `${y} yr`;
-    if (m) return `${m} mo`;
-    return `${d} day${d === 1 ? '' : 's'}`;
-  };
-  if (days >= 0) return `${words(days)} left`;
-  return `Expired ${words(-days)} ago`;
+  if (days >= 0) return `${durationWords(days)} left`;
+  return `Expired ${durationWords(-days)} ago`;
+}
+
+/** A span of days in words: "2 yr 3 mo", "4 mo", "12 days". */
+export function durationWords(d: number): string {
+  const y = Math.floor(d / 365);
+  const m = Math.floor((d % 365) / 30);
+  if (y && m) return `${y}\u00a0yr ${m}\u00a0mo`;
+  if (y) return `${y}\u00a0yr`;
+  if (m) return `${m}\u00a0mo`;
+  return `${d}\u00a0day${d === 1 ? '' : 's'}`;
 }
 
 export function initials(name: string): string {

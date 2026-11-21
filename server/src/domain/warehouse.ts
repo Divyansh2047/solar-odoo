@@ -1,4 +1,4 @@
-import { formatINR, formatQty, type PurchaseInput } from '@arka/shared';
+import { formatDate, formatINR, formatQty, type PurchaseInput } from '@arka/shared';
 import type { Db } from '../db/pool.js';
 import { conflict, invalid, notFound } from '../lib/errors.js';
 import { publish } from '../lib/events.js';
@@ -377,7 +377,7 @@ export async function deliverPickList(
   await logActivity(db, ctx, {
     customerId: pick.customer_id,
     jobId: pick.job_id,
-    body: `Delivered, received by ${input.receivedBy}. Warranty started for ${warranties.length} serials: ${[...byProduct].map(([p, v]) => `${v.n} × ${p} until ${v.end}`).join('; ')}.`,
+    body: `Delivered, received by ${input.receivedBy}. Warranty started for ${warranties.length} serials: ${[...byProduct].map(([p, v]) => `${v.n} × ${p} until ${formatDate(v.end)}`).join('; ')}.`,
   });
   await publish(db, ['dispatch', 'jobs']);
   return { warranties };

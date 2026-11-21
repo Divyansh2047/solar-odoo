@@ -15,6 +15,8 @@ import {
   Wrench,
   Package,
   Briefcase,
+  SquaresFour,
+  Info,
 } from '@phosphor-icons/react';
 import { initials, ROLE_LABEL, relativeTime } from '@arka/shared';
 import { api } from '../lib/api';
@@ -109,37 +111,41 @@ export function AppShell() {
           <span className="brand-name">Arka</span>
         </Link>
         <div className="workspace">
-          <b title={me.companyName}>{shownCompany(me.companyName)}</b>
-          <span>{ROLE_LABEL[me.role]}</span>
+          <span className="workspace-mark" aria-hidden>
+            {initials(shownCompany(me.companyName))}
+          </span>
+          <span className="workspace-who">
+            <b title={me.companyName}>{shownCompany(me.companyName)}</b>
+            <span>{me.companyKind === 'demo' ? 'Demo workspace' : 'Workspace'}</span>
+          </span>
         </div>
-        <nav>
+        <nav className="nav">
           <NavLink to="/app" end className="nav-link">
-            <House size={18} aria-hidden /> Today
+            {me.role === 'owner' || me.role === 'accounts' ? <SquaresFour size={18} aria-hidden /> : <House size={18} aria-hidden />}
+            <span className="nav-label">{me.role === 'owner' || me.role === 'accounts' ? 'Dashboard' : 'Today'}</span>
           </NavLink>
           <div className="nav-title">Customer journey</div>
-          <div className="journey">
-            {journey.map((n) => {
-              const cnt = c && n.count?.(c);
-              return (
-                <NavLink key={n.to} to={n.to} className="nav-link" title={n.hint}>
-                  <span className="node" aria-hidden />
-                  {n.label}
-                  {cnt && (
-                    <span className={`count ${cnt.hot ? 'hot' : ''}`} aria-label={`${cnt.n} waiting`}>
-                      {cnt.n}
-                    </span>
-                  )}
-                </NavLink>
-              );
-            })}
-          </div>
-          <div className="nav-title">Office</div>
+          {journey.map((n) => {
+            const cnt = c && n.count?.(c);
+            return (
+              <NavLink key={n.to} to={n.to} className="nav-link" title={n.hint}>
+                <n.icon size={18} aria-hidden />
+                <span className="nav-label">{n.label}</span>
+                {cnt && (
+                  <span className={`count ${cnt.hot ? 'hot' : ''}`} aria-label={`${cnt.n} waiting`}>
+                    {cnt.n}
+                  </span>
+                )}
+              </NavLink>
+            );
+          })}
+          <div className="nav-title">Back office</div>
           {office.map((n) => {
             const cnt = c && n.count?.(c);
             return (
               <NavLink key={n.to} to={n.to} className="nav-link" title={n.hint}>
-                <span className="node" aria-hidden />
-                {n.label}
+                <n.icon size={18} aria-hidden />
+                <span className="nav-label">{n.label}</span>
                 {cnt && <span className="count">{cnt.n}</span>}
               </NavLink>
             );
@@ -157,10 +163,10 @@ export function AppShell() {
               <b>{me.name}</b>
               <span title={shownEmail(me.email, me.companyKind === 'demo')}>{ROLE_LABEL[me.role]}</span>
             </span>
+            <button className="me-out" onClick={signOut} aria-label="Sign out" title="Sign out">
+              <SignOut size={18} aria-hidden />
+            </button>
           </div>
-          <button className="nav-link" onClick={signOut} style={{ border: 0, background: 'none', cursor: 'pointer', width: '100%' }}>
-            <SignOut size={18} aria-hidden /> Sign out
-          </button>
         </div>
       </aside>
       {railOpen && <div className="scrim" style={{ zIndex: 64 }} onClick={() => setRailOpen(false)} aria-hidden />}
@@ -168,6 +174,17 @@ export function AppShell() {
       <div className="main">
         {me.companyKind === 'demo' && <DemoRibbon onSwitched={refresh} />}
         <header className="topbar">
+          <Link to="/app" className="topbar-brand mobile-only" aria-label="Arka home">
+            <span className="brand-mark" aria-hidden>
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+            </span>
+            <span>{shownCompany(me.companyName)}</span>
+          </Link>
           <button className="searchbox" onClick={() => setPalette(true)} aria-label="Search customers, serials and documents">
             <MagnifyingGlass size={18} aria-hidden />
             <span>Search name, phone, serial…</span>
@@ -234,7 +251,8 @@ export function AppShell() {
 function MobileTabs({ onMenu, onSearch }: { onMenu: () => void; onSearch: () => void }) {
   const { me, can } = useSession();
   if (!me) return null;
-  const tabs: { to: string; label: string; icon: React.ReactNode }[] = [{ to: '/app', label: 'Today', icon: <House size={22} /> }];
+  const director = me.role === 'owner' || me.role === 'accounts';
+  const tabs: { to: string; label: string; icon: React.ReactNode }[] = [{ to: '/app', label: director ? 'Dashboard' : 'Today', icon: director ? <SquaresFour size={22} /> : <House size={22} /> }];
   if (me.role === 'technician') {
     tabs.push({ to: '/app/schedule', label: 'Schedule', icon: <CalendarBlank size={22} /> }, { to: '/app/service', label: 'Service', icon: <Wrench size={22} /> });
   } else if (me.role === 'warehouse') {
@@ -272,10 +290,13 @@ function DemoRibbon({ onSwitched }: { onSwitched: () => Promise<void> }) {
   const people = useQuery({ queryKey: ['demo-people'], queryFn: () => api.get<{ people: { id: number; name: string; role: keyof typeof ROLE_LABEL }[] }>('/api/auth/demo/people') });
   return (
     <div className="demo-ribbon" role="region" aria-label="Demo workspace">
-      <span className="ribbon-long">Demo workspace: your own copy of SunPower, deleted after 24 hours.</span>
+      <Info size={16} weight="fill" aria-hidden className="ribbon-icon" />
+      <span className="ribbon-long">
+        <b>Demo workspace.</b> Your own copy of SunPower Solutions, deleted after 24 hours.
+      </span>
       <span className="ribbon-short">Demo, deleted in 24 h.</span>
-      <label className="row" style={{ gap: 6 }}>
-        <span className="ribbon-long">See it as</span>
+      <label className="row ribbon-as" style={{ gap: 6 }}>
+        <span className="ribbon-long">Viewing as</span>
         <select
           value={me?.id}
           onChange={async (e) => {

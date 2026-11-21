@@ -72,8 +72,8 @@ export default function Portal() {
               controllers={1}
               height={320}
               labels={[
-                inverter && { part: 'inverter' as const, title: inverter.serial, detail: inverter.warranty_end ? `Until ${formatDate(inverter.warranty_end)}` : 'Starts on delivery', tone: inverter.warranty_end && inverter.warranty_end >= today ? ('good' as const) : ('neutral' as const) },
-                panels[0] && { part: 'panel' as const, title: `${panels.length} panels`, detail: `Until ${formatDate(panels[0].warranty_end)}`, tone: 'good' as const },
+                inverter && { part: 'inverter' as const, title: 'Inverter', detail: inverter.warranty_end ? `Covered until ${formatDate(inverter.warranty_end)}` : 'Starts on delivery', tone: inverter.warranty_end && inverter.warranty_end >= today ? ('good' as const) : ('neutral' as const) },
+                panels[0] && { part: 'panel' as const, title: `${panels.length} panels`, detail: `Covered until ${formatDate(panels[0].warranty_end)}`, tone: 'good' as const },
               ].filter(Boolean) as never}
             />
           )}

@@ -168,7 +168,7 @@ export default function EnquiryDetail() {
                 items={[
                   ['Phone', <a href={`tel:${l.phone}`}>{formatPhone(l.phone)}</a>],
                   ['Email', l.email],
-                  ['Address', <>{l.address}, {l.city} {l.pincode} <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${l.address}, ${l.city} ${l.pincode}`)}`} target="_blank" rel="noreferrer" aria-label="Open in maps"><MapPin size={14} /></a></>],
+                  ['Address', <>{l.address}, {l.city} {l.pincode} <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${l.address}, ${l.city} ${l.pincode}`)}`} target="_blank" rel="noreferrer" aria-label="Open in maps" style={{ display: 'inline-flex', verticalAlign: '-2px' }}><MapPin size={14} /></a></>],
                   ['For a', l.customer_kind === 'home' ? 'Home' : 'Business'],
                   ['Wants', <>{l.requested_kw ? formatKw(l.requested_kw) : 'Size not given'}, {SYSTEM_TYPE_LABEL[l.system_type]}{l.wants_subsidy ? ', with subsidy' : ''}</>],
                   ['Owner', <AssignPicker leadId={l.id} current={l.assigned_to} name={l.assigned_name} disabled={!writable} />],
@@ -418,20 +418,20 @@ function Qualify({ lead, writable }: { lead: Lead; writable: boolean }) {
           <div className="module-grid" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}>
             <div className="module-cell lit">
               <span className="k">Suggested size</span>
-              {sizing.recommendedKw ? <span className="v">{sizing.recommendedKw} kW</span> : <span className="v v-hint">Enter the bill</span>}
+              <span className={`v${sizing.recommendedKw ? '' : ' v-empty'}`}>{sizing.recommendedKw ? `${sizing.recommendedKw} kW` : '—'}</span>
               <span className="s">
-                {sizing.verdict === 'good' ? 'Looks good' : sizing.verdict === 'check' ? 'Check with a survey' : 'Not suitable'}
+                {!sizing.recommendedKw ? 'Add the bill to size the system' : sizing.verdict === 'good' ? 'Looks good' : sizing.verdict === 'check' ? 'Check with a survey' : 'Not suitable'}
                 {lead.requested_kw && sizing.recommendedKw && Number(lead.requested_kw) !== sizing.recommendedKw ? `; they asked for ${formatKw(lead.requested_kw)}` : ''}
               </span>
             </div>
             <div className="module-cell">
               <span className="k">Usage</span>
-              {sizing.monthlyUnits ? <span className="v">{sizing.monthlyUnits}</span> : <span className="v v-hint">From the bill</span>}
-              <span className="s">units a month</span>
+              <span className={`v${sizing.monthlyUnits ? '' : ' v-empty'}`}>{sizing.monthlyUnits || '—'}</span>
+              <span className="s">{sizing.monthlyUnits ? 'Units a month' : 'Estimated from the bill'}</span>
             </div>
             <div className="module-cell">
               <span className="k">Subsidy</span>
-              {sizing.recommendedKw ? <span className="v">{formatINR(subsidyFor(sizing.recommendedKw, w.systemType === 'off_grid' ? 'off_grid' : 'on_grid', lead.customer_kind))}</span> : <span className="v v-hint">After sizing</span>}
+              <span className={`v${sizing.recommendedKw ? '' : ' v-empty'}`}>{sizing.recommendedKw ? formatINR(subsidyFor(sizing.recommendedKw, w.systemType === 'off_grid' ? 'off_grid' : 'on_grid', lead.customer_kind)) : '—'}</span>
               <span className="s">{lead.customer_kind === 'home' ? 'PM Surya Ghar estimate' : 'Homes only'}</span>
             </div>
           </div>

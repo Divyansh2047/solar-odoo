@@ -19,17 +19,18 @@ import {
 import { api } from '../../lib/api';
 import { useSession } from '../../lib/session';
 import { Button, Chip, Empty, ErrorBlock, Money, Panel, Seg, SkeletonRows } from '../../components/ui';
-import { ModuleCell } from '../../components/solar';
-import { ProfitBars, WeeklyBars, type ProfitRow } from '../../components/charts';
+import { ProfitBars, Sparkline, WeeklyBars, type ProfitRow } from '../../components/charts';
+import { shownCompany } from '../../lib/demo';
 import { Dialog, useToast } from '../../components/overlay';
+import { DataTable } from '../../components/table';
 import Warehouse from './Warehouse';
 import Service from './Service';
 
 export default function Home() {
   const { me } = useSession();
   useEffect(() => {
-    document.title = 'Today · Arka';
-  }, []);
+    document.title = me?.role === 'owner' || me?.role === 'accounts' ? 'Dashboard · Arka' : 'Today · Arka';
+  }, [me?.role]);
   if (!me) return null;
   if (me.role === 'owner' || me.role === 'accounts') return <Director />;
   if (me.role === 'sales') return <SalesDesk />;
@@ -49,94 +50,258 @@ interface Dash {
   slaMinutes: number;
 }
 
-export function DashboardBody({ data, shared, aside }: { data: Dash; shared?: boolean; aside?: React.ReactNode }) {
+interface TrendWeek {
+  week: string;
+  kw: number;
+  cash: number;
+  enquiries: number;
+  won: number;
+  profit: number;
+}
+
+/**
+ * The director's numbers. Used by the dashboard and by the read-only shared report, so the optional
+ * parts (trend lines, the attention list, the order pipeline) are passed in only where they exist.
+ */
+export function DashboardBody({ data, shared, trend, attention, pipeline }: { data: Dash; shared?: boolean; trend?: TrendWeek[]; attention?: React.ReactNode; pipeline?: React.ReactNode }) {
   const k = data.kpis;
   const n = data.now;
   const margin = formatPercent(data.profit.profit, data.profit.revenue);
   const link = (to: string) => (shared ? undefined : to);
+  const series = (pick: (w: TrendWeek) => number) => trend?.map((w) => Number(pick(w)));
+  const period = data.period.label.toLowerCase();
   return (
     <>
-      <section className="module" aria-label={`Key numbers, ${data.period.label.toLowerCase()}`}>
-        <div className="module-grid">
-          <ModuleCell k="Enquiries in" v={k.enquiries} s={`${k.enquiries_web} from the web form`} to={link('/app/enquiries')} />
-          <ModuleCell k="Orders won" v={k.jobs_won} s={`${formatINRShort(k.orders_value ?? 0)} incl. GST`} to={link('/app/jobs')} />
-          <ModuleCell k="Installed" v={formatKw(k.kw_installed)} s={`${k.installs} rooftop${k.installs === 1 ? '' : 's'}`} tone="lit" to={link('/app/jobs?status=installed')} />
-          <ModuleCell k="Cash collected" v={formatINRShort(k.cash_in ?? 0)} s={`${formatINRShort(k.advances_in ?? 0)} of it advances`} to={link('/app/money/payments')} />
-          <ModuleCell
-            k="Profit on installed jobs"
-            v={formatINRShort(data.profit.profit)}
-            s={`${margin} margin${data.profit.losses ? `, ${data.profit.losses} lost money` : ''}`}
-            tone={data.profit.profit < 0 ? 'alert' : 'good'}
+      <section className="kpi-board" aria-label={`Key numbers, ${period}`}>
+        <div className="kpi-main">
+          <KpiCell label="Enquiries" value={k.enquiries} sub={`${k.enquiries_web} from the web form`} spark={series((w) => w.enquiries)} to={link('/app/enquiries')} />
+          <KpiCell label="Orders won" value={k.jobs_won} sub={`${formatINRShort(k.orders_value ?? 0)} incl. GST`} spark={series((w) => w.won)} to={link('/app/jobs')} />
+          <KpiCell label="Installed" value={formatKw(k.kw_installed)} sub={`${k.installs} rooftop${k.installs === 1 ? '' : 's'}`} spark={series((w) => w.kw)} lit to={link('/app/jobs?status=installed')} />
+          <KpiCell label="Cash collected" value={formatINRShort(k.cash_in ?? 0)} sub={`${formatINRShort(k.advances_in ?? 0)} of it advances`} spark={series((w) => w.cash)} to={link('/app/money/payments')} />
+        </div>
+        <div className="kpi-sub">
+          <KpiMini
+            label="Profit on installed jobs"
+            value={formatINRShort(data.profit.profit)}
+            sub={`${margin} margin${data.profit.losses ? `, ${data.profit.losses} lost money` : ''}`}
+            tone={data.profit.profit < 0 ? 'bad' : 'good'}
             to={link('/app/reports')}
           />
-          <ModuleCell k="Repairs still open" v={n.open_repairs} s={`${n.urgent_repairs} urgent, ${n.open_repairs_warranty} under warranty`} tone={n.urgent_repairs ? 'alert' : undefined} to={link('/app/service')} />
-          <ModuleCell k="Invoices to send" v={n.invoices_to_send} s={formatINRShort(n.invoices_to_send_value ?? 0)} to={link('/app/money/invoices')} />
-          <ModuleCell k="Subsidy pending" v={n.subsidy_pending} s={`${formatINRShort(n.subsidy_pending_value ?? 0)} for customers`} to={link('/app/money/subsidy')} />
+          <KpiMini label="Repairs still open" value={n.open_repairs} sub={`${n.urgent_repairs} urgent, ${n.open_repairs_warranty} under warranty`} tone={n.urgent_repairs ? 'bad' : undefined} to={link('/app/service')} />
+          <KpiMini label="Invoices to send" value={n.invoices_to_send} sub={formatINRShort(n.invoices_to_send_value ?? 0)} to={link('/app/money/invoices')} />
+          <KpiMini label="Subsidy pending" value={n.subsidy_pending} sub={`${formatINRShort(n.subsidy_pending_value ?? 0)} for customers`} to={link('/app/money/subsidy')} />
         </div>
+        {trend && <p className="kpi-note">Numbers are for {period}; the lines show the last 12 weeks.</p>}
       </section>
-      <div className="dash-grid">
+
+      {(trend || attention) && (
+        <div className="dash-split">
+          {trend ? <Performance weeks={trend} /> : <span />}
+          {attention}
+        </div>
+      )}
+
+      {pipeline}
+
+      <div className="dash-split wide-left">
         <Panel
           title="Which installations made money"
-          actions={<span className="muted" style={{ fontSize: 13 }}>{data.profit.jobs.length} installed {data.period.label.toLowerCase()}, losses first</span>}
+          actions={<span className="muted">{data.profit.jobs.length} installed {period}, losses first</span>}
+          foot={
+            !shared && data.profit.jobs.length > 10 ? (
+              <Link to="/app/reports">
+                See all {data.profit.jobs.length} jobs in the month-end report <CaretRight size={14} aria-hidden style={{ display: 'inline', verticalAlign: '-2px' }} />
+              </Link>
+            ) : undefined
+          }
         >
           <div className="panel-body">
             {data.profit.jobs.length ? (
-              <ProfitBars rows={data.profit.jobs} limit={shared ? 40 : 12} />
+              <ProfitBars rows={data.profit.jobs} limit={shared ? 40 : 10} />
             ) : (
               <Empty title="Nothing installed in this period yet">Profit appears here as soon as a crew signs off a job.</Empty>
             )}
           </div>
-          {!shared && data.profit.jobs.length > 12 && (
-            <div className="panel-foot">
-              <Link to="/app/reports">See all {data.profit.jobs.length} jobs</Link>
-            </div>
-          )}
         </Panel>
         <div className="stack">
-          {aside}
-          <Panel title="Subsidy paperwork">
-            <div className="panel-body">
-              <div className="pipeline">
-                {(['not_started', 'documents', 'applied', 'inspection', 'approved', 'disbursed'] as SubsidyStatus[]).map((s) => {
-                  const row = data.subsidy.find((x) => x.status === s);
-                  return (
-                    <div key={s}>
-                      <b>{row?.n ?? 0}</b>
-                      <span>{SUBSIDY_STATUS_LABEL[s]}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </Panel>
           <Panel title="Money in the pipeline">
             <div className="panel-body">
-              <div className="stat-row">
-                <div className="stat">
-                  <span className="stat-label">Customers still owe</span>
-                  <span className="stat-value">{formatINRShort((n.receivable_jobs ?? 0) + (n.receivable_service ?? 0))}</span>
-                </div>
-                <div className="stat">
-                  <span className="stat-label">Technicians to pay</span>
-                  <span className="stat-value">{formatINRShort(n.payroll_due ?? 0)}</span>
-                  <span className="muted" style={{ fontSize: 13 }}>{n.payroll_people} people, unpaid hours</span>
-                </div>
-                <div className="stat">
-                  <span className="stat-label">Stock bought</span>
-                  <span className="stat-value">{formatINRShort(k.stock_purchases ?? 0)}</span>
-                  <span className="muted" style={{ fontSize: 13 }}>{data.period.label.toLowerCase()}</span>
-                </div>
-                <div className="stat">
-                  <span className="stat-label">Technician hours</span>
-                  <span className="stat-value">{Math.round(k.tech_hours ?? 0)} h</span>
-                  <span className="muted" style={{ fontSize: 13 }}>{formatINRShort(k.tech_cost ?? 0)} cost</span>
-                </div>
+              <div className="fin-grid">
+                <FinStat label="Customers still owe" value={formatINRShort((n.receivable_jobs ?? 0) + (n.receivable_service ?? 0))} sub="invoices and job balances" />
+                <FinStat label="Technicians to pay" value={formatINRShort(n.payroll_due ?? 0)} sub={`${n.payroll_people ?? 0} people, unpaid hours`} />
+                <FinStat label="Stock bought" value={formatINRShort(k.stock_purchases ?? 0)} sub={period} />
+                <FinStat label="Technician hours" value={`${Math.round(k.tech_hours ?? 0)} h`} sub={`${formatINRShort(k.tech_cost ?? 0)} cost`} />
               </div>
             </div>
           </Panel>
+          <SubsidyStages rows={data.subsidy} />
         </div>
       </div>
     </>
+  );
+}
+
+function KpiCell({ label, value, sub, spark, lit, to }: { label: string; value: React.ReactNode; sub: string; spark?: number[]; lit?: boolean; to?: string }) {
+  const body = (
+    <>
+      <span className="kpi-k">{label}</span>
+      <span className="kpi-v">{value}</span>
+      <span className="kpi-s">{sub}</span>
+      {spark && spark.length > 1 && <Sparkline values={spark} />}
+    </>
+  );
+  const cls = `kpi-cell${lit ? ' lit' : ''}`;
+  return to ? (
+    <Link className={cls} to={to}>
+      {body}
+    </Link>
+  ) : (
+    <div className={cls}>{body}</div>
+  );
+}
+
+function KpiMini({ label, value, sub, tone, to }: { label: string; value: React.ReactNode; sub: string; tone?: 'good' | 'bad'; to?: string }) {
+  const body = (
+    <>
+      <span className="kpi-k">{label}</span>
+      <span className={`kpi-v${tone ? ` ${tone}` : ''}`}>{value}</span>
+      <span className="kpi-s">{sub}</span>
+    </>
+  );
+  return to ? (
+    <Link className="kpi-mini" to={to}>
+      {body}
+    </Link>
+  ) : (
+    <div className="kpi-mini">{body}</div>
+  );
+}
+
+function FinStat({ label, value, sub }: { label: string; value: string; sub: string }) {
+  return (
+    <div className="fin-stat">
+      <span className="fin-k">{label}</span>
+      <span className="fin-v">{value}</span>
+      <span className="fin-s">{sub}</span>
+    </div>
+  );
+}
+
+const SUBSIDY_ORDER: SubsidyStatus[] = ['not_started', 'documents', 'applied', 'inspection', 'approved', 'disbursed'];
+
+/** PM Surya Ghar paperwork, stage by stage: one hue, bar length = customers at that stage. */
+function SubsidyStages({ rows }: { rows: Dash['subsidy'] }) {
+  const counts = SUBSIDY_ORDER.map((s) => ({ s, n: rows.find((r) => r.status === s)?.n ?? 0 }));
+  const total = counts.reduce((a, c) => a + c.n, 0);
+  const max = Math.max(1, ...counts.map((c) => c.n));
+  return (
+    <Panel title="Subsidy paperwork" actions={<span className="muted">{total} customers</span>}>
+      <div className="panel-body">
+        <ul className="stage-bars">
+          {counts.map((c) => (
+            <li key={c.s}>
+              <span className="sb-label">{SUBSIDY_STATUS_LABEL[c.s]}</span>
+              <span className="sb-track" aria-hidden>
+                <i style={{ width: `${(c.n / max) * 100}%` }} />
+              </span>
+              <span className="sb-n">{c.n}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Panel>
+  );
+}
+
+const MEASURES = {
+  kw: { label: 'Installed', unit: (v: number) => `${Math.round(v)} kW` },
+  cash: { label: 'Cash collected', unit: (v: number) => formatINRShort(v) },
+  enquiries: { label: 'Enquiries', unit: (v: number) => String(Math.round(v)) },
+  won: { label: 'Orders won', unit: (v: number) => String(Math.round(v)) },
+} as const;
+type Measure = keyof typeof MEASURES;
+
+/** Twelve weeks of one measure at a time: one axis, one hue, no dual scales. */
+function Performance({ weeks }: { weeks: TrendWeek[] }) {
+  const [m, setM] = useState<Measure>('kw');
+  const meta = MEASURES[m];
+  const data = weeks.map((w) => ({ week: w.week, value: Number(w[m]) }));
+  const total = data.reduce((s, d) => s + d.value, 0);
+  const thisWeek = data[data.length - 1]?.value ?? 0;
+  const avg = data.length ? total / data.length : 0;
+  return (
+    <Panel
+      title="Last 12 weeks"
+      actions={
+        <Seg
+          label="Measure"
+          value={m}
+          onChange={setM}
+          options={[
+            { value: 'kw', label: 'Installed' },
+            { value: 'cash', label: 'Cash' },
+            { value: 'enquiries', label: 'Enquiries' },
+            { value: 'won', label: 'Orders' },
+          ]}
+        />
+      }
+    >
+      <div className="panel-body">
+        <div className="perf-head">
+          <div>
+            <span className="perf-k">{meta.label}, 12 weeks</span>
+            <span className="perf-v">{meta.unit(total)}</span>
+          </div>
+          <div>
+            <span className="perf-k">This week</span>
+            <span className="perf-v sm">{meta.unit(thisWeek)}</span>
+          </div>
+          <div>
+            <span className="perf-k">Weekly average</span>
+            <span className="perf-v sm">{meta.unit(avg)}</span>
+          </div>
+        </div>
+        <WeeklyBars data={data} format={meta.unit} label={`${meta.label} per week`} />
+      </div>
+    </Panel>
+  );
+}
+
+const PIPELINE: { status: string; label: string }[] = [
+  { status: 'awaiting_advance', label: 'Waiting for advance' },
+  { status: 'confirmed', label: 'To pack' },
+  { status: 'packed', label: 'Packed' },
+  { status: 'dispatched', label: 'On the truck' },
+  { status: 'delivered', label: 'Delivered' },
+  { status: 'installed', label: 'Installed, not closed' },
+];
+
+/** Every open order by stage, left to right in the order the work happens. */
+function OrderPipeline() {
+  const q = useQuery({ queryKey: ['jobs', 'pipeline'], queryFn: () => api.get<{ jobs: { status: string; total_paise: number }[] }>('/api/jobs?open=1') });
+  const stages = PIPELINE.map((p) => {
+    const jobs = (q.data?.jobs ?? []).filter((j) => j.status === p.status);
+    return { ...p, n: jobs.length, value: jobs.reduce((s, j) => s + Number(j.total_paise), 0) };
+  });
+  const open = stages.reduce((s, x) => s + x.n, 0);
+  return (
+    <Panel title="Orders in progress" actions={<Link to="/app/jobs">{q.data ? `${open} open jobs` : 'All jobs'}</Link>}>
+      {q.isLoading ? (
+        <SkeletonRows rows={2} />
+      ) : (
+        <ol className="pipe" aria-label="Open orders by stage">
+          {stages.map((s) => (
+            <li key={s.status}>
+              <Link to={`/app/jobs?status=${s.status}`} className={`pipe-cell${s.n ? '' : ' empty'}`}>
+                <span className="pipe-k">{s.label}</span>
+                <span className="pipe-n">{s.n}</span>
+                <span className="pipe-s">{s.n ? formatINRShort(s.value) : 'None'}</span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      )}
+    </Panel>
   );
 }
 
@@ -145,19 +310,21 @@ function Director() {
   const { me } = useSession();
   const [share, setShare] = useState(false);
   const dash = useQuery({ queryKey: ['dashboard', period], queryFn: () => api.get<Dash>(`/api/dashboard?period=${period}`) });
-  const trend = useQuery({ queryKey: ['trend'], queryFn: () => api.get<{ weeks: { week: string; kw: number; cash: number; enquiries: number; won: number; profit: number }[] }>('/api/reports/trend') });
+  const trend = useQuery({ queryKey: ['trend'], queryFn: () => api.get<{ weeks: TrendWeek[] }>('/api/reports/trend') });
   const unfinished = useQuery({ queryKey: ['unfinished'], queryFn: () => api.get<{ jobs: UnfinishedJob[] }>('/api/reports/unfinished') });
   const range = periodRange(period, new Date(), me?.timezone ?? 'Asia/Kolkata');
+  const company = me ? shownCompany(me.companyName) : '';
   return (
     <div className="page">
       <div className="dash-head">
         <div>
-          <h1>How is {me?.companyName.replace(/ \(demo\)$/, '')} doing {period === 'today' ? 'today' : period === 'week' ? 'this week' : 'this month'}?</h1>
-          <p className="lead muted">
-            {period === 'today' ? formatDate(range.from) : `${formatDate(range.from)} to today`}. Numbers update live as the team works.
+          <h1>Dashboard</h1>
+          <p className="dash-sub">
+            {company}, {period === 'today' ? formatDate(range.from) : `${formatDate(range.from)} to today`}
+            <span className="live-pill" title="Numbers update as the team works, without reloading.">Live</span>
           </p>
         </div>
-        <div className="row">
+        <div className="row dash-actions">
           <Seg
             label="Period"
             value={period}
@@ -170,37 +337,24 @@ function Director() {
           />
           {me?.role === 'owner' && (
             <Button onClick={() => setShare(true)} icon={<ShareNetwork size={18} />}>
-              Share these numbers
+              Share
             </Button>
           )}
         </div>
       </div>
       {dash.isLoading && <SkeletonRows rows={6} />}
       {dash.isError && <ErrorBlock error={dash.error} retry={() => dash.refetch()} />}
-      {dash.data && <DashboardBody data={dash.data} aside={<Attention now={dash.data.now} sla={dash.data.slaMinutes} />} />}
-      <div className="dash-grid">
-        <Panel title="What is still unfinished" actions={<Link to="/app/reports">All of it</Link>}>
-          {unfinished.isLoading ? <SkeletonRows rows={5} /> : <UnfinishedList jobs={(unfinished.data?.jobs ?? []).slice(0, 8)} />}
-        </Panel>
-        <Panel title="Rooftops installed per week">
-          <div className="panel-body">
-            {trend.data && (
-              <>
-                <div className="chart-head">
-                  <span className="muted">Last 12 weeks</span>
-                  <span className="big">{formatKw(trend.data.weeks.reduce((s, w) => s + Number(w.kw), 0))}</span>
-                </div>
-                <WeeklyBars data={trend.data.weeks.map((w) => ({ week: w.week, value: Number(w.kw) }))} format={(v) => `${Math.round(v)} kW`} label="kW installed per week" />
-                <div className="chart-head" style={{ marginTop: 16 }}>
-                  <span className="muted">Cash collected per week</span>
-                  <span className="big">{formatINRShort(trend.data.weeks.reduce((s, w) => s + Number(w.cash), 0))}</span>
-                </div>
-                <WeeklyBars data={trend.data.weeks.map((w) => ({ week: w.week, value: Number(w.cash) }))} format={(v) => formatINRShort(v)} label="Cash collected per week" />
-              </>
-            )}
-          </div>
-        </Panel>
-      </div>
+      {dash.data && (
+        <DashboardBody
+          data={dash.data}
+          trend={trend.data?.weeks}
+          attention={<Attention now={dash.data.now} sla={dash.data.slaMinutes} />}
+          pipeline={<OrderPipeline />}
+        />
+      )}
+      <Panel title="Jobs not closed yet, oldest first" actions={<Link to="/app/reports">See all</Link>}>
+        {unfinished.isLoading ? <SkeletonRows rows={5} /> : <UnfinishedTable jobs={(unfinished.data?.jobs ?? []).slice(0, 8)} />}
+      </Panel>
       <ShareDialog open={share} onClose={() => setShare(false)} period={period} />
     </div>
   );
@@ -215,18 +369,26 @@ function Attention({ now, sla }: { now: Record<string, number>; sla: number }) {
     now.awaiting_confirmation && { to: '/app/service', n: now.awaiting_confirmation, text: 'Repairs waiting for the customer to confirm', tone: '' },
     now.low_stock && { to: '/app/catalog', n: now.low_stock, text: 'Products at or below reorder level', tone: '' },
   ].filter(Boolean) as { to: string; n: number; text: string; tone: string }[];
-  if (!items.length) return null;
   return (
-    <section aria-label="Needs attention now" className="attention">
-      <h2 style={{ fontSize: 17, marginBottom: 2 }}>Needs someone now</h2>
-      {items.slice(0, 5).map((i) => (
-        <Link key={i.text} to={i.to} className={i.tone}>
-          <span className="n">{i.n}</span>
-          {i.text}
-          <CaretRight className="go" size={16} aria-hidden />
-        </Link>
-      ))}
-    </section>
+    <Panel title="Needs attention" actions={items.length ? <span className="badge">{items.length}</span> : undefined}>
+      {items.length ? (
+        <ul className="attn" aria-label="Needs attention now">
+          {items.map((i) => (
+            <li key={i.text}>
+              <Link to={i.to} className={i.tone}>
+                <span className="n">{i.n}</span>
+                <span className="t">{i.text}</span>
+                <CaretRight className="go" size={16} aria-hidden />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="panel-body">
+          <p className="muted">All clear. Nothing is waiting on anyone right now.</p>
+        </div>
+      )}
+    </Panel>
   );
 }
 
@@ -241,25 +403,45 @@ export interface UnfinishedJob {
   next: { label: string; owner: string };
 }
 
+/** Full-width form: a table with the next step and who owns it; phones get cards. */
+export function UnfinishedTable({ jobs }: { jobs: UnfinishedJob[] }) {
+  return (
+    <DataTable
+      rows={jobs}
+      rowKey={(j) => j.id}
+      to={(j) => `/app/jobs/${j.id}`}
+      empty={<Empty title="Nothing unfinished">Every job is closed. Time for chai.</Empty>}
+      columns={[
+        { header: 'Customer', cell: (j) => (<><span className="cell-main">{j.customer}</span><div className="cell-sub">{j.city}</div></>) },
+        { header: 'Job', className: 'nowrap', cell: (j) => (<><span className="mono">{j.ref}</span><div className="cell-sub">{formatKw(j.capacity_kw)}</div></>) },
+        { header: 'Next step', cell: (j) => j.next.label },
+        { header: 'With', cell: (j) => <Chip plain>{j.next.owner}</Chip> },
+        { header: 'Waiting', className: 'r nowrap', cell: (j) => relativeTime(j.since).replace(' ago', '') },
+      ]}
+      card={(j) => ({ title: j.customer, right: <Chip plain>{j.next.owner}</Chip>, meta: [j.ref, formatKw(j.capacity_kw), `waiting ${relativeTime(j.since).replace(' ago', '')}`], extra: <span>{j.next.label}</span> })}
+    />
+  );
+}
+
 export function UnfinishedList({ jobs }: { jobs: UnfinishedJob[] }) {
   if (!jobs.length) return <Empty title="Nothing unfinished">Every job is closed. Time for chai.</Empty>;
   return (
-    <ul style={{ listStyle: 'none', margin: 0, padding: '4px 8px 8px' }}>
+    <ul style={{ listStyle: 'none', margin: 0, padding: '4px 20px 8px' }}>
       {jobs.map((j) => (
         <li key={j.id}>
-          <Link to={`/app/jobs/${j.id}`} className="profit-row" style={{ gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1.4fr) auto' }}>
+          <Link to={`/app/jobs/${j.id}`} className="profit-row" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.25fr)' }}>
             <span className="who">
               <b>{j.customer}</b>
-              <span className="mono">{j.ref}</span> <span>{formatKw(j.capacity_kw)}</span>
+              <span className="meta-line">
+                <span className="mono">{j.ref}</span> {formatKw(j.capacity_kw)}
+              </span>
+              <span className="meta-line">Waiting {relativeTime(j.since).replace(' ago', '')}</span>
             </span>
             <span>
               {j.next.label}
               <span className="muted" style={{ display: 'block', fontSize: 12 }}>
                 {j.next.owner}
               </span>
-            </span>
-            <span className="muted num" style={{ fontSize: 13, textAlign: 'right' }}>
-              waiting {relativeTime(j.since).replace(' ago', '')}
             </span>
           </Link>
         </li>
@@ -349,7 +531,7 @@ function SalesDesk() {
     <div className="page">
       <div className="page-head">
         <div>
-          <h1>Who needs a call, {me?.name.split(' ')[0]}?</h1>
+          <h1>Sales desk</h1>
           <p className="lead">New enquiries first. The red ones have waited longer than they should.</p>
         </div>
         <div className="actions">

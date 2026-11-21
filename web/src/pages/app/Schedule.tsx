@@ -50,8 +50,8 @@ export default function Schedule() {
   return (
     <div className="page">
       <PageHead
-        title={me?.role === 'technician' ? 'Where are you needed this week?' : 'Who is where this week?'}
-        lead="An installation is booked on the first day enough technicians are free, as soon as the order is confirmed. Nobody can be booked in two places at once."
+        title={me?.role === 'technician' ? 'My schedule' : 'Schedule'}
+        lead="Roof surveys, installations and service visits, by technician."
       />
       <div className="toolbar">
         <Button size="sm" aria-label="Previous" icon={<CaretLeft size={16} />} onClick={() => setFrom(addDays(from, -days))} />
@@ -97,7 +97,7 @@ export default function Schedule() {
             </div>
             {dates.map((d) => (
               <div key={d} className={`bh ${d === today ? 'today' : ''}`} role="columnheader" aria-current={d === today ? 'date' : undefined}>
-                {new Date(`${d}T12:00:00Z`).toLocaleDateString('en-IN', { weekday: 'short' })} {formatDate(d).replace(/ \d{4}$/, '')}
+                {new Date(`${d}T12:00:00Z`).toLocaleDateString('en-IN', { weekday: 'short' })} {formatDate(d).replace(/\s\d{4}$/, '')}
               </div>
             ))}
           </div>
@@ -105,7 +105,7 @@ export default function Schedule() {
             <div key={t.id} style={{ display: 'contents' }} role="row">
               <div className="tech" role="rowheader">
                 {t.name}
-                <span>{load(t.id)} visits</span>
+                <span>{load(t.id)} {load(t.id) === 1 ? 'visit' : 'visits'}</span>
               </div>
               {dates.map((d) => {
                 const sunday = new Date(`${d}T12:00:00Z`).getUTCDay() === 0;
@@ -132,14 +132,13 @@ function VisitCard({ v, onEdit, showCrew }: { v: Visit; onEdit?: () => void; sho
   const done = v.status === 'done';
   return (
     <div className={`visit ${v.kind} ${done ? 'done' : ''}`}>
-      <Link to={to} className="visit-link">
-        <b className="visit-when">
+      <Link to={to} className="visit-link" title={`${VISIT_KIND_LABEL[v.kind]}: ${v.customer}, ${v.city}`}>
+        <span className="visit-time">
           {done && <CheckCircle size={14} weight="fill" aria-label="Done" />}
-          {formatTime(v.starts_at)} {VISIT_KIND_LABEL[v.kind]}
-        </b>
-        <span className="visit-who">
-          {v.customer}, {v.city}
+          {formatTime(v.starts_at)}
         </span>
+        <b className="visit-kind">{VISIT_KIND_LABEL[v.kind]}</b>
+        <span className="visit-who">{showCrew ? `${v.customer}, ${v.city}` : v.customer}</span>
         <span className="visit-ref">
           <span className="mono">{v.job_ref ?? v.survey_ref ?? v.ticket_ref}</span>
           {v.capacity_kw ? <span> {v.capacity_kw} kW</span> : null}
@@ -164,7 +163,7 @@ function Agenda({ dates, today, visits, techId, canEdit, onEdit }: { dates: stri
         return (
           <section key={d} className={`agenda-day ${d === today ? 'today' : ''}`} aria-current={d === today ? 'date' : undefined}>
             <h3>
-              {new Date(`${d}T12:00:00Z`).toLocaleDateString('en-IN', { weekday: 'long' })}, {formatDate(d).replace(/ \d{4}$/, '')}
+              {new Date(`${d}T12:00:00Z`).toLocaleDateString('en-IN', { weekday: 'long' })}, {formatDate(d).replace(/\s\d{4}$/, '')}
               <span>{list.length ? `${list.length} visit${list.length === 1 ? '' : 's'}` : 'Nothing booked'}</span>
             </h3>
             {list.map((v) => (

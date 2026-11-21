@@ -1,4 +1,4 @@
-import { addDays, estimateGeneration, formatINR, lineAmount, subsidyFor, taxOn, type Shading } from '@arka/shared';
+import { addDays, estimateGeneration, formatDate, formatINR, lineAmount, subsidyFor, taxOn, type Shading } from '@arka/shared';
 import type { Db } from '../db/pool.js';
 import { config } from '../config.js';
 import { token } from '../lib/crypto.js';
@@ -193,7 +193,7 @@ export async function sendQuote(db: Db, ctx: Ctx, id: number): Promise<{ link: s
         subject: `Your solar quote ${q.ref} from ${co.name}`,
         lines: [`Hello ${c.name.split(' ')[0]},`, `Here is your quote for a ${q.capacity_kw} kW system: ${formatINR(q.total_paise)} including GST.`, 'Open it to see the full parts list, the subsidy estimate and your expected savings. You can accept it online.'],
         action: { label: 'View your quote', url: link },
-        footer: `${co.name} · valid until ${q.valid_until}`,
+        footer: `${co.name}. Valid until ${formatDate(q.valid_until)}.`,
       },
       { demo: ctx.isDemo },
     ));

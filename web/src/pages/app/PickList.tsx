@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Barcode, Camera, CheckCircle, Printer, Truck, WarningOctagon, X, Package } from '@phosphor-icons/react';
-import { CATEGORY_LABEL, PICK_STATUS_LABEL, deliverSchema, dispatchSchema, formatDate, formatDateTime, formatINR, formatKw, formatQty, type PickStatus, type ProductCategory } from '@arka/shared';
+import { formatPhone, CATEGORY_LABEL, PICK_STATUS_LABEL, deliverSchema, dispatchSchema, formatDate, formatDateTime, formatINR, formatKw, formatQty, type PickStatus, type ProductCategory } from '@arka/shared';
 import { api, ApiError } from '../../lib/api';
 import { useSession } from '../../lib/session';
 import { Button, Callout, Chip, ErrorBlock, KV, PageHead, Panel, SkeletonRows } from '../../components/ui';
@@ -306,7 +306,7 @@ export default function PickList() {
                 items={[
                   ['Customer', p.customer],
                   ['Address', `${p.address}, ${p.city}`],
-                  ['Phone', <a href={`tel:${p.phone}`}>{p.phone}</a>],
+                  ['Phone', <a href={`tel:${p.phone}`}>{formatPhone(p.phone)}</a>],
                   ['Stock value', p.goods_value_paise !== null || estValue !== null ? `${formatINR(p.goods_value_paise ?? estValue ?? 0)} at cost` : null],
                 ]}
               />

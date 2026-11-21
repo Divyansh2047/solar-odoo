@@ -120,13 +120,13 @@ export default function Enquire() {
             <div className="module-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
               <div className="module-cell lit">
                 <span className="k">A system around</span>
-                {guess?.recommendedKw ? <span className="v">{guess.recommendedKw} kW</span> : <span className="v v-hint">Enter your monthly bill</span>}
-                <span className="s">{guess?.monthlyUnits ? `for about ${guess.monthlyUnits} units a month` : 'we size it from what you use'}</span>
+                <span className={`v${guess?.recommendedKw ? '' : ' v-empty'}`}>{guess?.recommendedKw ? `${guess.recommendedKw} kW` : '—'}</span>
+                <span className="s">{guess?.monthlyUnits ? `For about ${guess.monthlyUnits} units a month` : 'Enter your monthly bill to see it'}</span>
               </div>
               <div className="module-cell">
                 <span className="k">Subsidy, up to</span>
-                {kind !== 'home' ? <span className="v v-hint">Homes only</span> : <span className="v">{formatINR(guess?.recommendedKw ? subsidyFor(guess.recommendedKw, sys === 'off_grid' ? 'off_grid' : 'on_grid', kind) : PM_SURYA_GHAR.capPaise)}</span>}
-                <span className="s">{kind === 'home' ? 'PM Surya Ghar, on-grid homes' : 'PM Surya Ghar covers homes'}</span>
+                {kind !== 'home' ? <span className="v v-empty">—</span> : <span className="v">{formatINR(guess?.recommendedKw ? subsidyFor(guess.recommendedKw, sys === 'off_grid' ? 'off_grid' : 'on_grid', kind) : PM_SURYA_GHAR.capPaise)}</span>}
+                <span className="s">{kind === 'home' ? 'PM Surya Ghar, on-grid homes' : 'PM Surya Ghar covers homes only'}</span>
               </div>
             </div>
           </section>

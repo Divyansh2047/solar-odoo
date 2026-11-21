@@ -42,20 +42,22 @@ export default function Jobs() {
   }, []);
   const list = useQuery({
     queryKey: ['jobs', open, status, q],
-    queryFn: () => api.get<{ jobs: Row[] }>(`/api/jobs${qs({ open: status === 'all' ? open : null, status, q: q.trim().length >= 2 ? q.trim() : null })}`),
+    queryFn: () => api.get<{ jobs: Row[] }>(`/api/jobs${qs({ open: status === 'all' && open === '1' ? '1' : null, status, q: q.trim().length >= 2 ? q.trim() : null })}`),
     placeholderData: (p) => p,
   });
   return (
     <div className="page">
-      <PageHead title="Where is every order?" lead="Each strip is one order: a cell lights up as each step is done, from advance paid to closed." />
+      <PageHead title="Jobs" lead="Every order, from advance paid to closed." />
       <div className="toolbar">
         <Seg
           label="Show"
           value={status !== 'all' ? status : open === '1' ? 'open' : 'all'}
-          onChange={(v) => setParams(v === 'open' ? {} : v === 'all' ? { open: '0' } : { status: v })}
+          onChange={(v) => setParams(v === 'open' ? {} : v === 'all' ? { open: 'all' } : { status: v })}
           options={[
             { value: 'open', label: 'Open' },
             { value: 'awaiting_advance', label: 'Waiting for advance' },
+            { value: 'confirmed', label: 'To pack' },
+            { value: 'packed', label: 'Packed' },
             { value: 'dispatched', label: 'On the truck' },
             { value: 'delivered', label: 'Delivered' },
             { value: 'installed', label: 'Installed' },

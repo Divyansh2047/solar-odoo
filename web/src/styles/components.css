@@ -11,7 +11,7 @@
   border: 1px solid var(--line-strong);
   background: var(--surface);
   color: var(--ink);
-  font-weight: 700;
+  font-weight: 600;
   font-size: var(--t-14);
   line-height: 1;
   cursor: pointer;
@@ -128,6 +128,8 @@
   display: grid;
   gap: 6px;
   min-width: 0;
+  /* a taller neighbour in the same row must not stretch this field's label row */
+  align-content: start;
 }
 .field > label,
 .field-label {
@@ -143,7 +145,7 @@
 .select,
 .textarea {
   width: 100%;
-  min-height: 44px;
+  min-height: 40px;
   line-height: 1.4;
   padding: 10px 12px;
   border-radius: var(--r-ctl);
@@ -185,7 +187,14 @@
 }
 .input:not(textarea),
 .select {
-  height: 44px;
+  height: 40px;
+}
+@media (pointer: coarse) {
+  .input:not(textarea),
+  .select {
+    height: 44px;
+    min-height: 44px;
+  }
 }
 .input-affix > .input {
   min-width: 0;
@@ -376,6 +385,7 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r-panel);
+  box-shadow: var(--shadow-sm);
   min-width: 0;
 }
 .panel-head {
@@ -383,17 +393,24 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--s-3);
-  padding: var(--s-4) var(--s-5) 0;
+  min-height: 52px;
+  padding: 12px var(--s-5);
+  border-bottom: 1px solid var(--line);
 }
 .panel-head h2,
 .panel-head h3 {
-  font-size: var(--t-17);
+  font-size: var(--t-15);
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+.panel-head .row {
+  font-size: var(--t-13);
 }
 .panel-body {
   padding: var(--s-4) var(--s-5) var(--s-5);
 }
 .panel-body.tight {
-  padding: var(--s-3) var(--s-4);
+  padding: var(--s-3) var(--s-5);
 }
 .panel-foot {
   border-top: 1px solid var(--line);
@@ -465,7 +482,7 @@
   background: transparent;
   color: var(--ink-2);
   font-size: var(--t-12);
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
 }
 .chip::before {
@@ -535,14 +552,14 @@
 .table th {
   text-align: left;
   font-size: var(--t-12);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--ink-3);
-  padding: 10px var(--s-3);
+  padding: 9px var(--s-3);
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
   position: sticky;
   top: 0;
-  background: var(--surface);
+  background: var(--surface-2);
   z-index: 1;
 }
 .table td {
@@ -580,7 +597,7 @@
   box-shadow: inset 3px 0 0 var(--sun);
 }
 .cell-main {
-  font-weight: 700;
+  font-weight: 600;
   color: var(--ink);
 }
 .cell-sub {
@@ -668,7 +685,8 @@
 }
 .stat-value {
   font-size: var(--t-20);
-  font-weight: 800;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
 }
 
@@ -686,16 +704,15 @@
   width: 12px;
   height: 16px;
   border-radius: 2px;
-  background: var(--silicon-2);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  background: var(--cell-off);
+  box-shadow: inset 0 0 0 1px var(--cell-off-line);
   transition: background var(--med) var(--ease);
 }
 .cellstrip i.done {
   background: var(--sun);
 }
 .cellstrip i.na {
-  background: repeating-linear-gradient(135deg, var(--frame) 0 2px, var(--silicon-2) 2px 4px);
-  opacity: 0.6;
+  background: repeating-linear-gradient(135deg, var(--cell-hatch) 0 2px, var(--cell-off) 2px 4px);
 }
 .cellstrip.lg i {
   width: auto;
@@ -714,14 +731,14 @@
   gap: 2px;
   padding: 8px 8px 7px;
   border-radius: 3px;
-  background: var(--silicon-2);
-  color: #9fb0c6;
+  background: var(--cell-off);
+  color: var(--cell-off-ink);
   min-height: 56px;
   align-content: end;
 }
 .stage b {
   font-size: var(--t-12);
-  color: #d8e2ee;
+  color: var(--ink);
   line-height: 1.2;
 }
 .stage small {
@@ -735,10 +752,10 @@
   color: var(--sun-ink);
 }
 .stage.next {
-  box-shadow: inset 0 0 0 2px var(--sun);
+  box-shadow: inset 0 0 0 2px var(--sun-strong);
 }
 .stage.na {
-  background: repeating-linear-gradient(135deg, #22344f 0 4px, var(--silicon-2) 4px 8px);
+  background: repeating-linear-gradient(135deg, var(--cell-hatch) 0 4px, var(--cell-off) 4px 8px);
 }
 @media (max-width: 760px) {
   .stages {
@@ -746,78 +763,75 @@
   }
 }
 
-/* ---------- the KPI "module" ---------- */
+/* ---------- the KPI "module": one strip of cells, joined like a string of panels ---------- */
 .module {
-  background: var(--module-bg);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: var(--r-panel);
-  padding: 4px;
-  border: 1px solid var(--frame);
-  box-shadow: inset 0 0 0 3px #3d4f69;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
 }
 .module-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 2px;
-  background: var(--module-gap);
-  border-radius: 9px;
-  overflow: hidden;
+  gap: 1px;
+  background: var(--line);
 }
 .module-cell {
-  background: var(--module-cell);
-  color: var(--module-ink);
-  padding: var(--s-4) var(--s-4) var(--s-3);
+  position: relative;
   display: grid;
-  gap: 4px;
   grid-template-rows: auto auto 1fr;
   align-content: start;
-  min-height: 108px;
-  position: relative;
+  gap: 6px;
+  min-height: 112px;
+  padding: var(--s-4) var(--s-5);
+  background: var(--surface);
+  color: var(--ink);
   text-decoration: none;
-}
-.module-cell .s {
-  align-self: end;
-}
-.module-cell::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent calc(50% - 0.5px), rgba(255, 255, 255, 0.035) 50%, transparent calc(50% + 0.5px));
-  pointer-events: none;
 }
 .module-cell .k {
   font-size: var(--t-13);
-  color: var(--module-ink-2);
+  color: var(--ink-2);
   font-weight: 600;
 }
 .module-cell .v {
-  font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem);
-  font-weight: 800;
+  font-size: clamp(1.5rem, 1.25rem + 0.8vw, 1.875rem);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
-  line-height: 1.05;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--ink);
 }
 .module-cell .s {
+  align-self: end;
   font-size: var(--t-12);
-  color: var(--module-ink-2);
+  color: var(--ink-3);
 }
-.module-cell.lit {
-  background: linear-gradient(180deg, #2a2410, #1d1a10);
-}
-.module-cell.lit .v {
-  color: var(--sun);
+/* the one cell that matters most on the screen carries a sun line, not a colour flood */
+.module-cell.lit::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  background: var(--sun);
 }
 .module-cell.alert .v {
-  color: #ff8a7e;
+  color: var(--bad);
 }
 .module-cell.good .v {
-  color: #55d9a0;
+  color: var(--good);
+}
+a.module-cell {
+  transition: background var(--fast) var(--ease);
 }
 a.module-cell:hover {
-  background: #1b2d47;
+  background: var(--surface-2);
 }
 a.module-cell:focus-visible {
-  outline: 3px solid var(--sun);
-  outline-offset: -3px;
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 @media (max-width: 980px) {
   .module-grid {
@@ -1317,6 +1331,8 @@ kbd {
     flex-wrap: nowrap;
     overflow-x: auto;
     scrollbar-width: none;
+  }
+  .seg.overflowing {
     -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent);
     mask-image: linear-gradient(90deg, #000 88%, transparent);
   }
@@ -1327,7 +1343,7 @@ kbd {
     white-space: nowrap;
     flex: none;
   }
-  .seg button:last-child {
+  .seg.overflowing button:last-child {
     margin-right: 24px;
   }
   .module-cell .k {
@@ -1446,4 +1462,50 @@ kbd {
   .disclosure-caret {
     transition: none;
   }
+}
+
+/* rows inside a panel: dividers instead of a box inside a box */
+.flat-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.flat-list > li + li {
+  border-top: 1px solid var(--line);
+}
+.flat-list .card-row {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 14px var(--s-5);
+}
+.flat-list > li:last-child .card-row {
+  border-radius: 0 0 var(--r-panel) var(--r-panel);
+}
+.flat-list .card-row:hover {
+  background: var(--surface-2);
+}
+
+/* a link with an icon in a panel header stays on one line */
+.panel-head a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* links inside table cells read as text; the colour and underline arrive on hover */
+.table td a:not(.btn) {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+.table td a:not(.btn):hover {
+  color: var(--cell);
+  text-decoration: underline;
+}
+.table td a:not(.btn):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
 }

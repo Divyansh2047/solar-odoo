@@ -14,7 +14,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font);
-  font-size: var(--t-15);
+  font-size: var(--t-14);
   line-height: 1.5;
   font-feature-settings: 'tnum' 0;
   -webkit-font-smoothing: antialiased;
@@ -26,9 +26,9 @@ h2,
 h3,
 h4 {
   margin: 0;
-  line-height: 1.15;
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.015em;
   text-wrap: balance;
 }
 h1 {

@@ -42,8 +42,8 @@ export default function Reports() {
   return (
     <div className="page">
       <PageHead
-        title="Which installations made money, and what is still unfinished?"
-        lead="Profit per job is revenue without GST, minus parts at cost, crew hours, job expenses, and any repairs done free under warranty."
+        title="Month-end report"
+        lead="Profit per job: revenue without GST, less parts, crew, expenses and free repairs."
         actions={
           <a className="btn" href={`/api/reports/profit.csv${period === 'all' ? '' : `?period=${period}`}`} download>
             <DownloadSimple size={18} /> Download CSV
@@ -88,7 +88,7 @@ export default function Reports() {
                   </Link>{' '}
                   <ProfitAmount paise={r.profit_paise} />
                   <p className="muted" style={{ fontSize: 14 }}>
-                    {causes.length ? causes.join('; ') : 'Thin margin across the board'}.
+                    {causes.length ? `${String(causes.join('; ')).charAt(0).toUpperCase()}${String(causes.join('; ')).slice(1)}` : 'Thin margin across the board'}.
                   </p>
                 </div>
               );

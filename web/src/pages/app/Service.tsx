@@ -63,7 +63,7 @@ export default function Service() {
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: me?.timezone ?? 'Asia/Kolkata' }).format(new Date());
   return (
     <div className="page">
-      <PageHead title="Who needs help, and is it covered?" lead="Type part of a serial number, a phone number or a name. Warranty is checked the moment you find the unit." />
+      <PageHead title="Service" lead="Complaints, repairs and warranty cover." />
       {can('customers.read') && (
         <Panel>
           <div className="panel-body stack">
@@ -185,7 +185,8 @@ export default function Service() {
                 header: 'Problem',
                 cell: (r) => (
                   <>
-                    {r.priority === 'urgent' && <Lightning size={14} weight="fill" color="var(--bad)" aria-label="Urgent" />} {r.description.slice(0, 70)}
+                    {r.priority === 'urgent' && <Lightning size={14} weight="fill" color="var(--bad)" aria-label="Urgent" style={{ display: 'inline', verticalAlign: '-2px', marginRight: 4 }} />}
+                    {r.description.slice(0, 70)}
                     {r.description.length > 70 ? '…' : ''}
                     <div className="cell-sub">
                       {r.fault_code ? `Fault ${r.fault_code}, ` : ''}

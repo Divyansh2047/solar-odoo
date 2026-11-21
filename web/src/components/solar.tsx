@@ -31,7 +31,7 @@ export function Stages({ stages, dates }: { stages: StageState; dates: Partial<R
       {JOB_STAGES.map((s) => (
         <li key={s} className={`stage ${stages[s] === 'done' ? 'done' : ''} ${stages[s] === 'na' ? 'na' : ''} ${s === next ? 'next' : ''}`} aria-current={s === next ? 'step' : undefined}>
           <b>{JOB_STAGE_LABEL[s]}</b>
-          <small>{stages[s] === 'done' ? (dates[s] ? formatDate(dates[s]!) : 'Done') : stages[s] === 'na' ? 'Not needed' : s === next ? 'Next' : ' '}</small>
+          <small>{stages[s] === 'done' ? (dates[s] ? formatDate(dates[s]!) : 'Done') : stages[s] === 'na' ? 'Not needed' : s === next ? 'Next' : '—'}</small>
         </li>
       ))}
     </ol>

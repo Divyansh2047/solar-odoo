@@ -20,9 +20,10 @@ export default function Settings() {
   }, []);
   return (
     <div className="page">
-      <PageHead title="Who works here, and how does the company run?" lead="Roles decide what each person can see and do. The server checks every action, not just the screen." />
+      <PageHead title="Team and settings" lead="People, roles and company details." />
       <Seg
         label="Section"
+        variant="tabs"
         value={tab}
         onChange={setTab}
         options={[

@@ -85,8 +85,8 @@ export default function Enquiries() {
   return (
     <div className="page">
       <PageHead
-        title="Who asked for solar, and what happens next?"
-        lead="Web form, WhatsApp and phone enquiries land here. Nothing is ever deleted: closing one needs a reason."
+        title="Enquiries"
+        lead="Web form, WhatsApp, phone and walk-in enquiries in one list."
         actions={
           can('leads.write') && (
             <>

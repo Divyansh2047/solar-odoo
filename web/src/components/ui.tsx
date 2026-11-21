@@ -1,4 +1,4 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { ApiError } from '../lib/api';
 import { Link } from 'react-router';
 import { ArrowLeft, Info, CheckCircle, Warning, WarningOctagon } from '@phosphor-icons/react';
@@ -157,9 +157,34 @@ export function ProfitAmount({ paise }: { paise: number }) {
   );
 }
 
-export function Seg<T extends string>({ value, onChange, options, label }: { value: T; onChange: (v: T) => void; options: { value: T; label: string; count?: number }[]; label: string }) {
+/**
+ * A row of choices. `variant="tabs"` is for switching between sections of a page (underlined);
+ * the default pill style is for filters. On a narrow screen the row scrolls sideways, fades only
+ * when something is really cut off, and keeps the chosen option in view.
+ */
+export function Seg<T extends string>({ value, onChange, options, label, variant }: { value: T; onChange: (v: T) => void; options: { value: T; label: string; count?: number }[]; label: string; variant?: 'tabs' }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [overflow, setOverflow] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setOverflow(el.scrollWidth - el.clientWidth > 2 && el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
+    check();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(check) : null;
+    ro?.observe(el);
+    el.addEventListener('scroll', check, { passive: true });
+    return () => {
+      ro?.disconnect();
+      el.removeEventListener('scroll', check);
+    };
+  }, [options.length]);
+  useEffect(() => {
+    const el = ref.current;
+    const on = el?.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (el && on && el.scrollWidth > el.clientWidth) el.scrollTo({ left: Math.max(0, on.offsetLeft - 16), behavior: 'instant' as ScrollBehavior });
+  }, [value]);
   return (
-    <div className="seg" role="group" aria-label={label}>
+    <div ref={ref} className={`seg${variant === 'tabs' ? ' seg-tabs' : ''}${overflow ? ' overflowing' : ''}`} role="group" aria-label={label}>
       {options.map((o) => (
         <button key={o.value} type="button" aria-pressed={value === o.value} onClick={() => onChange(o.value)}>
           {o.label}

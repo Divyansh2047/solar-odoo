@@ -33,7 +33,7 @@ export default function Quotes() {
   const q = useQuery({ queryKey: ['quotes', status], queryFn: () => api.get<{ quotes: Row[] }>(`/api/quotes${qs({ status })}`) });
   return (
     <div className="page">
-      <PageHead title="Which quotes are with customers?" lead="Quotes are built from a kit template and an approved roof survey, so the parts list is never typed by hand." />
+      <PageHead title="Quotes" lead="Built from kit templates and approved roof surveys." />
       <Seg
         label="Status"
         value={status}

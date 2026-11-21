@@ -46,8 +46,8 @@ export default function Warehouse() {
   return (
     <div className="page">
       <PageHead
-        title="What needs packing, and what’s on the trucks?"
-        lead="A pick list is made the moment an order is confirmed. Every inverter, battery, charge controller and panel is scanned before it leaves."
+        title="Warehouse"
+        lead="Pick lists, serial scanning and dispatch."
         actions={
           can('stock.write') && (
             <Button variant="primary" icon={<Plus size={18} />} onClick={() => setReceive(true)}>
@@ -150,7 +150,7 @@ function PickGroup({ title, picks, empty }: { title: string; picks: Pick[]; empt
   if (!picks.length) return null;
   return (
     <Panel title={title} actions={<span className="badge">{picks.length}</span>}>
-      <ul style={{ listStyle: 'none', margin: 0, padding: 12, display: 'grid', gap: 8 }}>
+      <ul className="flat-list">
         {picks.map((p) => (
           <li key={p.id}>
             <Link to={`/app/warehouse/pick/${p.id}`} className="card-row" style={{ display: 'grid' }}>

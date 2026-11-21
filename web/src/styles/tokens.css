@@ -17,8 +17,8 @@
   --cell-soft: #e7eefb;
 
   /* surfaces */
-  --bg: #f2f5f8;
-  --bg-2: #e8edf2;
+  --bg: #f4f6f9;
+  --bg-2: #eaeef3;
   --surface: #ffffff;
   --surface-2: #f8fafc;
   --frame: #c9d2dc;
@@ -56,7 +56,14 @@
   --sun-chip-line: #f0d58a;
   --seg-on-bg: #ffffff;
   --placeholder: #64748b;
+  --cell-off: #e2e8f0;
+  --cell-off-line: #cdd6e1;
+  --cell-off-ink: #3b4a5e;
+  --cell-hatch: #cfd8e3;
+  --chip-neutral-bg: #e8edf3;
+  --visit-install-bg: #fff1cc;
   --shadow-float: 0 18px 40px -18px rgba(14, 26, 43, 0.45), 0 2px 6px -2px rgba(14, 26, 43, 0.12);
+  --shadow-sm: 0 1px 2px rgba(14, 26, 43, 0.06), 0 1px 1px rgba(14, 26, 43, 0.03);
   --shadow-sheet: 0 -16px 40px -20px rgba(14, 26, 43, 0.35);
 
   /* type */
@@ -93,7 +100,7 @@
   --fast: 160ms;
   --med: 240ms;
 
-  --rail-w: 232px;
+  --rail-w: 248px;
   --top-h: 56px;
   --tab-h: 64px;
 }
@@ -134,7 +141,14 @@
   --sun-chip-line: rgba(255, 194, 51, 0.4);
   --seg-on-bg: #24364f;
   --placeholder: #8c9bb0;
+  --cell-off: #1c2c44;
+  --cell-off-line: rgba(255, 255, 255, 0.06);
+  --cell-off-ink: #b7c3d3;
+  --cell-hatch: #2a3d58;
+  --chip-neutral-bg: #24364f;
+  --visit-install-bg: #1a2a42;
   --shadow-float: 0 18px 40px -18px rgba(0, 0, 0, 0.7), 0 2px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -172,6 +186,13 @@
     --sun-chip-line: rgba(255, 194, 51, 0.4);
     --seg-on-bg: #24364f;
     --placeholder: #8c9bb0;
+    --cell-off: #1c2c44;
+    --cell-off-line: rgba(255, 255, 255, 0.06);
+    --cell-off-ink: #b7c3d3;
+    --cell-hatch: #2a3d58;
+    --chip-neutral-bg: #24364f;
+    --visit-install-bg: #1a2a42;
     --shadow-float: 0 18px 40px -18px rgba(0, 0, 0, 0.7), 0 2px 6px -2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
   }
 }

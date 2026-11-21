@@ -121,12 +121,9 @@ export default function QuoteDetail() {
         <Panel>
           <div className="panel-body row between share-row">
             <span className="share-text">
-              <b>Waiting for {quote.customer.split(' ')[0]}.</b> Their link opens the quote and lets them accept it:{' '}
-              <span className="mono" title={link}>
-                …/q/{quote.public_token.slice(0, 4)}…{quote.public_token.slice(-4)}
-              </span>
+              <b>Waiting for {quote.customer.split(' ')[0]}.</b> Their link opens the quote and lets them accept it.
             </span>
-            <span className="row">
+            <span className="row btn-row">
               <Button
                 size="sm"
                 icon={<Copy size={16} />}

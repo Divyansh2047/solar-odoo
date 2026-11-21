@@ -34,7 +34,7 @@ export default function Surveys() {
   return (
     <div className="page">
       <PageHead
-        title={me?.role === 'technician' ? 'Which roofs do you need to measure?' : 'Which roofs have been measured?'}
+        title={me?.role === 'technician' ? 'My roof surveys' : 'Roof surveys'}
         lead="A technician records roof direction, tilt and cable distance with photos. Only an approved survey can become a quote."
       />
       <Seg

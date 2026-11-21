@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CurrencyInr, Truck, ClipboardText, CheckCircle, XCircle, Package, ArrowSquareOut, CalendarBlank, CaretRight } from '@phosphor-icons/react';
 import {
+  formatPhone,
   CATEGORY_LABEL,
   COVERAGE_LABEL,
   EXPENSE_CATEGORIES,
@@ -195,9 +196,9 @@ export default function JobDetail() {
                 controllers={d.kit.controllers}
                 height={300}
                 labels={[
-                  inverter && { part: 'inverter' as const, title: inverter.serial, detail: inverter.warranty_end ? (inverter.warranty_end >= today ? `Covered until ${formatDate(inverter.warranty_end)}` : 'Warranty ended') : 'Warranty starts on delivery', tone: inverter.warranty_end ? (inverter.warranty_end >= today ? ('good' as const) : ('bad' as const)) : ('neutral' as const) },
-                  panelsSerials[0] && { part: 'panel' as const, title: `${panelsSerials.length} panels`, detail: panelsSerials[0].warranty_end ? `Until ${formatDate(panelsSerials[0].warranty_end)}` : '20-year warranty', tone: 'good' as const },
-                  battery && { part: 'battery' as const, title: battery.serial, detail: battery.warranty_end ? `Until ${formatDate(battery.warranty_end)}` : '2-year warranty', tone: 'neutral' as const },
+                  inverter && { part: 'inverter' as const, title: 'Inverter', detail: inverter.warranty_end ? (inverter.warranty_end >= today ? `Covered until ${formatDate(inverter.warranty_end)}` : 'Warranty ended') : 'Warranty starts on delivery', tone: inverter.warranty_end ? (inverter.warranty_end >= today ? ('good' as const) : ('bad' as const)) : ('neutral' as const) },
+                  panelsSerials[0] && { part: 'panel' as const, title: `${panelsSerials.length} panels`, detail: panelsSerials[0].warranty_end ? `Covered until ${formatDate(panelsSerials[0].warranty_end)}` : '20-year warranty', tone: 'good' as const },
+                  battery && { part: 'battery' as const, title: 'Battery', detail: battery.warranty_end ? `Covered until ${formatDate(battery.warranty_end)}` : '2-year warranty', tone: 'neutral' as const },
                 ].filter(Boolean) as never}
               />
               <details className="disclosure">
@@ -453,7 +454,7 @@ export default function JobDetail() {
               <KV
                 items={[
                   ['Address', `${j.address}, ${j.city}`],
-                  ['Phone', <a href={`tel:${j.phone}`}>{j.phone}</a>],
+                  ['Phone', <a href={`tel:${j.phone}`}>{formatPhone(j.phone)}</a>],
                   ['Quote', <Link to={`/app/quotes/${j.quote_id}`} className="mono">{j.quote_ref} v{j.quote_version}</Link>],
                   ['Accepted', `${j.accepted_name}, ${formatDate(j.accepted_at)}`],
                 ]}

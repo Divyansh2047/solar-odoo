@@ -1,4 +1,4 @@
-import { formatINR, PAYMENT_METHOD_LABEL, type PaymentMethod } from '@arka/shared';
+import { formatDate, formatINR, PAYMENT_METHOD_LABEL, type PaymentMethod } from '@arka/shared';
 import type { Db } from '../db/pool.js';
 import { conflict } from '../lib/errors.js';
 import { publish } from '../lib/events.js';
@@ -110,7 +110,7 @@ export async function confirmJob(db: Db, ctx: Ctx, jobId: number): Promise<{ pic
     customerId: job.customer_id,
     jobId,
     body: `Order confirmed. Pick list ${pick.ref} sent to the warehouse${pick.status === 'waiting_stock' ? ' (some parts short)' : ''}. ${
-      install ? `Installation booked for ${install.date} with ${install.crew.join(', ')}.` : 'No crew free in the next 4 weeks: schedule it by hand.'
+      install ? `Installation booked for ${formatDate(install.date)} with ${install.crew.join(', ')}.` : 'No crew free in the next 4 weeks: schedule it by hand.'
     }`,
   });
   await notifyRoles(db, ['warehouse'], {
