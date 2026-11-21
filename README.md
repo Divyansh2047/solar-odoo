@@ -14,7 +14,7 @@ Built for the Odoo hackathon final: *Solar Installation Management System* (“S
   SunPower Solutions with about three months of history (around 40 rooftops a month), deleted after
   24 hours. Use **See it as** in the yellow bar to switch between director, sales, technician,
   warehouse, support and accounts.
-- **Live URL:** _add after deployment_ (see [Deploy](#deploy)).
+- **Live URL:** https://arka.scriptjacker.in
 
 ---
 
