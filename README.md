@@ -15,6 +15,7 @@ Built for the Odoo hackathon final: *Solar Installation Management System* (“S
   24 hours. Use **See it as** in the yellow bar to switch between director, sales, technician,
   warehouse, support and accounts.
 - **Live URL:** https://arka.scriptjacker.in
+- **Youtube Video Link** https://youtu.be/iWWQ6UjOv6Y
 
 ---
 
